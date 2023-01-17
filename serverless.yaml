@@ -1,0 +1,38 @@
+service: event-driven-arch-service
+# useDotEnv: true
+
+custom:
+  time_out:
+    prod: 10 
+    dev: 100
+  function_handler:
+    prod: dist/main.handler 
+    dev: src/main.handler
+  plugins:
+    prod:
+      - serverless-offline
+    dev:
+      - serverless-plugin-typescript
+      - serverless-offline
+
+plugins: ${self:custom.plugins.${self:provider.stage}}
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  memorySize: 512
+  region: ap-southeast-1
+  stage: ${opt:stage, 'dev'}
+
+functions:
+  main:
+    handler: ${self:custom.function_handler.${self:provider.stage}}
+    timeout: ${self:custom.time_out.${self:provider.stage}}
+    events:
+      - http:
+          method: ANY
+          path: /
+      - http:
+          method: ANY
+          path: '{proxy+}'
+
