@@ -1,8 +1,41 @@
 {
   "$schema": "https://json.schemastore.org/nest-cli",
   "collection": "@nestjs/schematics",
-  "sourceRoot": "src",
+  "sourceRoot": "apps/restAPI/src",
   "compilerOptions": {
-    "deleteOutDir": true
+    "deleteOutDir": true,
+    "webpack": true,
+    "tsConfigPath": "apps/restAPI/tsconfig.app.json"
+  },
+  "monorepo": true,
+  "root": "apps/restAPI",
+  "projects": {
+    "restAPI": {
+      "type": "application",
+      "root": "apps/restAPI",
+      "entryFile": "main",
+      "sourceRoot": "apps/restAPI/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/restAPI/tsconfig.app.json"
+      }
+    },
+    "cronJob": {
+      "type": "application",
+      "root": "apps/cronJob",
+      "entryFile": "main",
+      "sourceRoot": "apps/cronJob/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/cronJob/tsconfig.app.json"
+      }
+    },
+    "message-queue": {
+      "type": "application",
+      "root": "apps/message-queue",
+      "entryFile": "main",
+      "sourceRoot": "apps/message-queue/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/message-queue/tsconfig.app.json"
+      }
+    }
   }
 }

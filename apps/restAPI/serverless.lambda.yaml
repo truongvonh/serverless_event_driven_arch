@@ -1,0 +1,21 @@
+restAPI:
+  handler: ${self:custom.function_handler.restAPI.handler.${self:provider.stage}}
+  time_out: 10
+  events:
+    - http:
+        method: ANY
+        path: /
+        authorizer:
+          name: authorizerWithCognito
+          type: COGNITO_USER_POOLS
+          scopes:
+            - email
+            - phone
+          arn:
+            Fn::GetAtt: [UserPool, Arn]
+          authorizerId:
+            Ref: ApiGatewayAuthorizer
+
+    - http:
+        method: ANY
+        path: "{proxy+}"

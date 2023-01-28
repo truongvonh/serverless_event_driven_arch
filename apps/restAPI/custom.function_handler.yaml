@@ -1,0 +1,3 @@
+handler:
+  dev: apps/restAPI/src/main.handler 
+  prod: dist/apps/restAPI/main.handler'

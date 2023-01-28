@@ -2,18 +2,16 @@ service: event-driven-arch-service
 # useDotEnv: true
 
 custom:
+  region:
+    prod: ap-southeast-1
+    dev: ap-southeast-1
   time_out:
-    prod: 10 
-    dev: 100
+    prod: 10
+    dev: 20
   function_handler:
-    prod: dist/main.handler 
-    dev: src/main.handler
-  plugins:
-    prod:
-      - serverless-offline
-    dev:
-      - serverless-plugin-typescript
-      - serverless-offline
+    restAPI: ${file(./apps/restAPI/custom.function_handler.yaml)}
+    cronJob: ${file(./apps/cronJob/custom.function_handler.yaml)}
+  plugins: ${file(./serverless/custom.plugin.yaml)}
 
 plugins: ${self:custom.plugins.${self:provider.stage}}
 
@@ -21,18 +19,62 @@ provider:
   name: aws
   runtime: nodejs14.x
   memorySize: 512
-  region: ap-southeast-1
+  region: ${self:custom.region.${self:provider.stage}}
   stage: ${opt:stage, 'dev'}
 
 functions:
-  main:
-    handler: ${self:custom.function_handler.${self:provider.stage}}
-    timeout: ${self:custom.time_out.${self:provider.stage}}
-    events:
-      - http:
-          method: ANY
-          path: /
-      - http:
-          method: ANY
-          path: '{proxy+}'
+  - ${file(./apps/restAPI/serverless.lambda.yaml)}
+  - ${file(./apps/cronJob/serverless.lambda.yaml)}
 
+resources:
+  Resources:
+    UserPoolClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        UserPoolId: !Ref UserPool
+        AllowedOAuthFlows:
+          # - code
+          - implicit
+          # - client_credentials
+        AllowedOAuthFlowsUserPoolClient: true
+        AllowedOAuthScopes:
+          - email
+          - phone
+          - openid
+          - profile
+        GenerateSecret: true
+        CallbackURLs:
+          - https://oauth.pstmn.io/v1/callback
+        SupportedIdentityProviders:
+          - COGNITO
+    UserPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        UserPoolName: ${sls:stage}-${self:service}-user-pool
+        UsernameAttributes:
+          - email
+        AutoVerifiedAttributes:
+          - email
+        Policies:
+          PasswordPolicy:
+            MinimumLength: 8
+            RequireLowercase: false
+            RequireNumbers: true
+            RequireSymbols: true
+            RequireUppercase: true
+    ApiGatewayAuthorizer:
+      Type: AWS::ApiGateway::Authorizer
+      Properties:
+        Name: ApiGatewayAuthorizer
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        Type: COGNITO_USER_POOLS
+        ProviderARNs:
+          - Fn::GetAtt: [UserPool, Arn]
+        IdentitySource: method.request.header.Authorization
+# constructs:
+#   testQueue:
+#     type: queue
+#     fifo: true
+#     worker:
+#       handler: ${self:custom.function_handler.queueWorker.${self:provider.stage}}

@@ -1,0 +1,7 @@
+prod:
+  - serverless-offline
+  - serverless-lift
+dev:
+  - serverless-plugin-typescript
+  - serverless-offline
+  - serverless-lift

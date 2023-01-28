@@ -1,0 +1,3 @@
+handler:
+  dev: apps/cronJob/src/main.handler 
+  prod: dist/cronJob/main.handler'

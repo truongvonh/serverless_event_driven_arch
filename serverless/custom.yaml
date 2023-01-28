@@ -1,0 +1,21 @@
+region:
+  prod: ap-southeast-1 
+  dev: ap-southeast-1
+time_out:
+  prod: 10 
+  dev: 20
+function_handler:
+  rest_api:
+    dev: apps/event-driven-arch/src/main.handler 
+    prod: dist/apps/event-driven-arch/main.handler
+  queue_worker:
+    dev: apps/schedule_tasks/src/main.handler 
+    prod: dist/schedule_tasks/main.handler
+plugins:
+  prod:
+    - serverless-offline
+    - serverless-lift
+  dev:
+    - serverless-plugin-typescript
+    - serverless-offline
+    - serverless-lift

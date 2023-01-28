@@ -7,27 +7,29 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "node dist/apps/event-driven-arch/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
-    "sls:dev": "sls offline start --reloadHandler",
+    "sls:dev": "sls offline --stage dev --reloadHandler",
     "nvm_use": "source $HOME/.nvm/nvm.sh; nvm use 16.14",
     "nvm_use_local": "source /usr/local; nvm use 16.14",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:e2e": "jest --config ./apps/event-driven-arch/test/jest-e2e.json",
     "deploy:prod": "sls deploy --aws-profile sls_event_driven_profile --stage prod"
   },
   "dependencies": {
+    "@aws-cdk/aws-sqs": "^1.190.0",
     "@nestjs/common": "^9.0.0",
     "@nestjs/core": "^9.0.0",
     "@nestjs/platform-express": "^9.0.0",
     "@vendia/serverless-express": "^4.10.1",
+    "aws-cognito-idp-userpool-domain": "^0.1.5",
     "aws-lambda": "^1.0.7",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0"
@@ -48,6 +50,7 @@
     "eslint-plugin-prettier": "^4.0.0",
     "jest": "29.3.1",
     "prettier": "^2.3.2",
+    "serverless-lift": "^1.21.0",
     "serverless-offline": "^12.0.4",
     "serverless-plugin-typescript": "^2.1.4",
     "source-map-support": "^0.5.20",
@@ -64,7 +67,7 @@
       "json",
       "ts"
     ],
-    "rootDir": "src",
+    "rootDir": ".",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
@@ -72,7 +75,14 @@
     "collectCoverageFrom": [
       "**/*.(t|j)s"
     ],
-    "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "coverageDirectory": "./coverage",
+    "testEnvironment": "node",
+    "roots": [
+      "<rootDir>/apps/",
+      "<rootDir>/libs/"
+    ],
+    "moduleNameMapper": {
+      "^@apps/serverless-bootstrap(|/.*)$": "<rootdir>/libs/serverless-bootstrap/src/$1"
+    }
   }
 }

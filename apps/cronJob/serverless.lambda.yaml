@@ -1,0 +1,4 @@
+cronJob:
+  handler: ${self:custom.function_handler.cronJob.handler.${self:provider.stage}}
+  events:
+    - schedule: rate(10 hours)
